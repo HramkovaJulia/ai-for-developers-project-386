@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/.env
+**/.env.local
+**/npm-debug.log
+playwright-report
+test-results
+.DS_Store
+*.md
+typespec
+tests
+playwright.config.ts

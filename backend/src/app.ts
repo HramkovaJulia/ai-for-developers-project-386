@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
 import { eventTypesRouter } from './routes/eventTypesRouter';
 import { slotsRouter } from './routes/slotsRouter';
 import { bookingsRouter } from './routes/bookingsRouter';
@@ -24,10 +26,20 @@ export function createApp() {
     });
   }
 
-  // 404 для неизвестных маршрутов
-  app.use((_req, res) => {
-    res.status(404).json({ error: 'Not Found', message: 'Route not found' });
-  });
+  // Статические файлы фронтенда (если собраны)
+  const publicDir = path.join(__dirname, '..', 'public');
+  if (fs.existsSync(publicDir)) {
+    app.use(express.static(publicDir));
+    // SPA fallback — все не-API маршруты отдают index.html
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(publicDir, 'index.html'));
+    });
+  } else {
+    // 404 для неизвестных маршрутов (dev-режим без фронтенда)
+    app.use((_req, res) => {
+      res.status(404).json({ error: 'Not Found', message: 'Route not found' });
+    });
+  }
 
   // Глобальный обработчик непойманных ошибок
   app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

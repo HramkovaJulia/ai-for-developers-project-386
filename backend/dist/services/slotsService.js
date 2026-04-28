@@ -47,10 +47,13 @@ exports.slotsService = {
         const now = new Date();
         const allSlots = generateRawSlots(eventType.durationMinutes, now);
         const allBookings = storage_1.storage.bookings.findAll();
-        // Фильтруем слоты, которые пересекаются с любым существующим бронированием
         return allSlots.filter(slot => {
             const slotStart = new Date(slot.start);
             const slotEnd = new Date(slot.end);
+            // Отбрасываем слоты в прошлом (start должен быть строго в будущем)
+            if (slotStart <= now)
+                return false;
+            // Отбрасываем слоты, пересекающиеся с существующими бронированиями
             const isConflict = allBookings.some(b => (0, overlap_1.hasOverlap)(slotStart, slotEnd, new Date(b.start), new Date(b.end)));
             return !isConflict;
         });
