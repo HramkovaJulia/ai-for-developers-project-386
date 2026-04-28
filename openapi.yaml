@@ -1,0 +1,239 @@
+openapi: 3.0.0
+info:
+  title: Calendar Booking Service
+  version: 1.0.0
+
+paths:
+  /event-types:
+    get:
+      operationId: EventTypes_list
+      summary: List event types
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventType'
+              examples:
+                example:
+                  value:
+                    - id: "et-001"
+                      name: "Консультация"
+                      description: "Индивидуальная консультация"
+                      durationMinutes: 60
+                    - id: "et-002"
+                      name: "Демо продукта"
+                      description: "Демонстрация возможностей продукта"
+                      durationMinutes: 30
+                    - id: "et-003"
+                      name: "Интервью"
+                      description: "Техническое интервью"
+                      durationMinutes: 45
+    post:
+      operationId: EventTypes_create
+      summary: Create event type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventTypeCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventType'
+              examples:
+                example:
+                  value:
+                    id: "et-new-001"
+                    name: "Новый тип"
+                    description: "Описание нового типа"
+                    durationMinutes: 30
+
+  /event-types/{eventTypeId}/slots:
+    get:
+      operationId: Slots_list
+      summary: List available slots for event type
+      parameters:
+        - name: eventTypeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Slot'
+              examples:
+                example:
+                  value:
+                    - start: "2026-04-29T09:00:00Z"
+                      end: "2026-04-29T10:00:00Z"
+                    - start: "2026-04-29T10:00:00Z"
+                      end: "2026-04-29T11:00:00Z"
+                    - start: "2026-04-29T11:00:00Z"
+                      end: "2026-04-29T12:00:00Z"
+                    - start: "2026-04-29T14:00:00Z"
+                      end: "2026-04-29T15:00:00Z"
+                    - start: "2026-04-30T09:00:00Z"
+                      end: "2026-04-30T10:00:00Z"
+                    - start: "2026-04-30T11:00:00Z"
+                      end: "2026-04-30T12:00:00Z"
+                    - start: "2026-05-01T10:00:00Z"
+                      end: "2026-05-01T11:00:00Z"
+
+  /bookings:
+    get:
+      operationId: Bookings_list
+      summary: List bookings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+              examples:
+                example:
+                  value:
+                    - id: "bk-001"
+                      eventTypeId: "et-001"
+                      guestName: "Иван Иванов"
+                      guestEmail: "ivan@example.com"
+                      start: "2026-04-29T09:00:00Z"
+                      end: "2026-04-29T10:00:00Z"
+                    - id: "bk-002"
+                      eventTypeId: "et-002"
+                      guestName: "Мария Петрова"
+                      guestEmail: "maria@example.com"
+                      start: "2026-04-30T09:00:00Z"
+                      end: "2026-04-30T09:30:00Z"
+    post:
+      operationId: Bookings_create
+      summary: Create booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+              examples:
+                example:
+                  value:
+                    id: "bk-new-001"
+                    eventTypeId: "et-001"
+                    guestName: "Новый Гость"
+                    guestEmail: "guest@example.com"
+                    start: "2026-04-29T09:00:00Z"
+                    end: "2026-04-29T10:00:00Z"
+
+components:
+  schemas:
+    EventType:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - durationMinutes
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+
+    EventTypeCreate:
+      type: object
+      required:
+        - name
+        - description
+        - durationMinutes
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+
+    Slot:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+
+    Booking:
+      type: object
+      required:
+        - id
+        - eventTypeId
+        - guestName
+        - guestEmail
+        - start
+        - end
+      properties:
+        id:
+          type: string
+        eventTypeId:
+          type: string
+        guestName:
+          type: string
+        guestEmail:
+          type: string
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+
+    BookingCreate:
+      type: object
+      required:
+        - eventTypeId
+        - guestName
+        - guestEmail
+        - start
+      properties:
+        eventTypeId:
+          type: string
+        guestName:
+          type: string
+        guestEmail:
+          type: string
+        start:
+          type: string
+          format: date-time
